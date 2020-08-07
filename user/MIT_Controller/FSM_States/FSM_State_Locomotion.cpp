@@ -61,8 +61,8 @@ void FSM_State_Locomotion<T>::handleMessage(const lcm::ReceiveBuffer *rbuf, cons
 {   (void)rbuf;
     printf("Received message on channel \"%s\":\n", chan.c_str());
     printf("  _xarray   = %f %f %f %f \n", (float) msg->xarray[0],(float) msg->xarray[1],(float) msg->xarray[2],(float) msg->xarray[3]);
-    printf("  _xarray   = %f %f %f %f \n", (float) msg->yarray[0],(float) msg->yarray[1],(float) msg->yarray[2],(float) msg->yarray[3]);
-    printf("  _xarray   = %f %f %f %f \n", (float) msg->zarray[0],(float) msg->zarray[1],(float) msg->zarray[2],(float) msg->zarray[3]);
+    printf("  _yarray   = %f %f %f %f \n", (float) msg->yarray[0],(float) msg->yarray[1],(float) msg->yarray[2],(float) msg->yarray[3]);
+    printf("  _zarray   = %f %f %f %f \n", (float) msg->zarray[0],(float) msg->zarray[1],(float) msg->zarray[2],(float) msg->zarray[3]);
     
     _xarray.setZero();
     _yarray.setZero();
@@ -71,8 +71,8 @@ void FSM_State_Locomotion<T>::handleMessage(const lcm::ReceiveBuffer *rbuf, cons
 
     for (int point_num = 0; point_num < 30; ++point_num) {
       _xarray[point_num] = msg->xarray[point_num];
-      _xarray[point_num] = msg->yarray[point_num];
-      _xarray[point_num] = msg->zarray[point_num];
+      _yarray[point_num] = msg->yarray[point_num];
+      _zarray[point_num] = msg->zarray[point_num];
     }
 
 }
