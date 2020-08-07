@@ -3,6 +3,11 @@
 
 #include <Controllers/convexMPC/ConvexMPCLocomotion.h>
 #include "FSM_State.h"
+#include <lcm-cpp.hpp>
+#include <thread>
+#include "pcl_type.hpp"
+
+
 
 template<typename T> class WBC_Ctrl;
 template<typename T> class LocomotionCtrlData;
@@ -14,6 +19,9 @@ class FSM_State_Locomotion : public FSM_State<T> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   FSM_State_Locomotion(ControlFSMData<T>* _controlFSMData);
+
+  void handleMessage(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
+                    const pcl_type *msg);
 
   // Behavior to be carried out when entering a state
   void onEnter();
@@ -36,6 +44,14 @@ class FSM_State_Locomotion : public FSM_State<T> {
   ConvexMPCLocomotion* cMPCOld;
   WBC_Ctrl<T> * _wbc_ctrl;
   LocomotionCtrlData<T> * _wbc_data;
+
+  lcm::LCM _locoLCM;  
+  std::thread _locoLCMThread;
+  void locoLCMThread() { while (true) { _locoLCM.handle(); } }
+
+  Vec30<T> _xarray;
+  Vec30<T> _yarray;
+  Vec30<T> _zarray;
 
   // Parses contact specific controls to the leg controller
   void LocomotionControlStep();

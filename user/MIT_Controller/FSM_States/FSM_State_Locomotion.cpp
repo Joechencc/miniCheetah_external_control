@@ -18,7 +18,7 @@
  */
 template <typename T>
 FSM_State_Locomotion<T>::FSM_State_Locomotion(ControlFSMData<T>* _controlFSMData)
-    : FSM_State<T>(_controlFSMData, FSM_StateName::LOCOMOTION, "LOCOMOTION")
+    : FSM_State<T>(_controlFSMData, FSM_StateName::LOCOMOTION, "LOCOMOTION"),_locoLCM(getLcmUrl(255))
 {
   if(_controlFSMData->_quadruped->_robotType == RobotType::MINI_CHEETAH){
     cMPCOld = new ConvexMPCLocomotion(_controlFSMData->controlParameters->controller_dt,
@@ -46,6 +46,35 @@ FSM_State_Locomotion<T>::FSM_State_Locomotion(ControlFSMData<T>* _controlFSMData
   this->footstepLocations = Mat34<T>::Zero();
   _wbc_ctrl = new LocomotionCtrl<T>(_controlFSMData->_quadruped->buildModel());
   _wbc_data = new LocomotionCtrlData<T>();
+
+  if (!_locoLCM.good()){
+    return;
+  }
+
+  _locoLCM.subscribe("pcl_type", &FSM_State_Locomotion<T>::handleMessage, this);
+  _locoLCMThread = std::thread(&FSM_State_Locomotion<T>::locoLCMThread, this);
+}
+
+template <typename T>
+void FSM_State_Locomotion<T>::handleMessage(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
+                    const pcl_type *msg)
+{   (void)rbuf;
+    printf("Received message on channel \"%s\":\n", chan.c_str());
+    printf("  _xarray   = %f %f %f %f \n", (float) msg->xarray[0],(float) msg->xarray[1],(float) msg->xarray[2],(float) msg->xarray[3]);
+    printf("  _xarray   = %f %f %f %f \n", (float) msg->yarray[0],(float) msg->yarray[1],(float) msg->yarray[2],(float) msg->yarray[3]);
+    printf("  _xarray   = %f %f %f %f \n", (float) msg->zarray[0],(float) msg->zarray[1],(float) msg->zarray[2],(float) msg->zarray[3]);
+    
+    _xarray.setZero();
+    _yarray.setZero();
+    _zarray.setZero();
+   
+
+    for (int point_num = 0; point_num < 30; ++point_num) {
+      _xarray[point_num] = msg->xarray[point_num];
+      _xarray[point_num] = msg->yarray[point_num];
+      _xarray[point_num] = msg->zarray[point_num];
+    }
+
 }
 
 template <typename T>
